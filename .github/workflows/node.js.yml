@@ -1,0 +1,58 @@
+name: Production CI/CD
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy_prod:
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [21.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Ensure persistent AI folders exist
+        run: |
+          mkdir -p /home/gaurav/code/modules/AI/faceid_portraits \
+                   /home/gaurav/code/modules/AI/generated_audio \
+                   /home/gaurav/code/modules/AI/generated_images \
+                   /home/gaurav/code/modules/AI/myoc_faces \
+                   /home/gaurav/code/logs
+
+      - name: Sync Git Repo to ~/code-prod using rsync (excluding AI folders)
+        run: |
+          rsync -avc --delete \
+            --exclude='node_modules/' \
+            --exclude='.env' \
+            --exclude='keys/' \
+            --exclude='logs/' \
+            --exclude='modules/AI/faceid_portraits/' \
+            --exclude='modules/AI/generated_audio/' \
+            --exclude='modules/AI/generated_images/' \
+            --exclude='modules/AI/myoc_faces/' \
+            "$GITHUB_WORKSPACE"/ /home/gaurav/code/
+
+      # - name: Install dependencies
+      #   run: |
+      #     cd /home/ec2-user/code-prod
+      #     npm i
+
+      # - name: Set up .env file
+      #   run: |
+      #     echo "${{ secrets.PROD_ENV }}" > /home/ec2-user/code/.env
+
+      # - name: Restart production server with PM2
+      #   run: |
+      #     pm2 restart 0

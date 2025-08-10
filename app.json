@@ -1,0 +1,15 @@
+{
+  "apps": [
+    {
+      "name": "TestService",
+      "script": "index.js",
+      "watch": ["index.js"],
+      "ignore_watch": ["node_modules", "logs"],
+      "log_file": "logs/TelegramService.log",
+      "error_file": "logs/TelegramService-err.log",
+      "log_date_format": "YYYY-MM-DD HH:mm:ss Z",
+      "max_memory_restart": "6000M",
+      "node_args": "--max-old-space-size=6144"
+    }
+  ]
+}
